@@ -1,0 +1,13 @@
+<!-- -*- mode: XML -*- -->
+
+<launch>
+	<master auto="start"/>
+	<node name="map_server" pkg="map_server" type="map_server" args="$(find enps_dwa)/maps/temple.yaml" />
+	<node pkg="enps_dwa" type="enps_dwa_node" name="enps_dwa_node" output="screen" respawn="false">
+	</node>
+
+	<node pkg="rviz" type="rviz" name="rviz" args="-d $(find enps_dwa)/rviz/temple.rviz"/>
+
+
+</launch>
+		
