@@ -2,8 +2,6 @@
 A C++ ROS simulator for reactive social robot navigation based on Enzymatic Numerical P systems.
 It is based on the model proposed in [1] by Ignacio Perez-Hurtado, David Orellana-Martin, Miguel A. Martinez-del-Amor and Luis. Valencia-Cabrera.
 
-*This software uses and adapts the LightSFM library [2] for the Social Force Model developed by the Service Robotics Lab (Pablo de Olavide University) under the terms of the BSD license in the framework of the TERESA FP7 project [3].*
-
 ## Abstract
 
 A mobile robot acting in a human environment should follow social conventions such as keeping security distances and navigating at speeds that do not disturb the surrounding people while avoiding obstacles in real-time. The problem is more complex if a differential-drive wheeled robot is considered, whose trajectories are constrained by nonholonomic and kinematics restrictions. It is an NP-hard problem  widely studied in the literature, by combining disciplines such as Psychology, Mathematics, Computer Science and Engineering. In this work, we propose a novel solution based on the paradigm of Membrane Computing, the Social Force Model and the Dynamic Window Approach Algorithm. The result is a model which is able to compute the best motion command for the robot in logarithmic time, considering the surrounding people, obstacles, as well as the current state of the robot. The model is compatible with other membrane computing models for robotics and suitable for an implementation on parallel hardware. Finally, a visual simulator has been implemented in ROS and C++ for validation and testing purposes.
@@ -22,7 +20,7 @@ The software has been developed for ROS Noetic under Ubuntu 20.04.
 1. Install ROS Noetic in Ubuntu 20.04 (desktop-full-install) following the instructions at http://wiki.ros.org/noetic/Installation/Ubuntu
 2. Create an empty workspace following the instructions at http://wiki.ros.org/catkin/Tutorials/create_a_workspace
 3. Clone this repository in the */src* folder of the workspace.
-4. Compile the whole workspace by using *catkin_make* 
+4. Compile the whole workspace by using **catkin_make**
 
 
 ## Running instructions
@@ -31,15 +29,22 @@ There is an example *launch* file at *enps_dwa/launch/* folder.
 **roslaunch enps_dwa temple.launch**
 
 
+## Acknowledgements
+
+This work was supported by the research project TIN2017-89842-P (MABICAP), co-financed by *Ministerio de Economia, Industria y Competitividad (MINECO)* of Spain, through the *Agencia Estatal de Investigacion (AEI)*, and by *Fondo Europeo de Desarrollo Regional (FEDER)* of the European Union.
+
+This software uses and adapts the LightSFM library [3] for the Social Force Model and the PedLab pedestrian simulator [4] developed by the Service Robotics Lab (Pablo de Olavide University) under the terms of the BSD license in the framework of the TERESA FP7 project [2]. The authors acknowledge the Service Robotics Lab (Pablo de Olavide University) for such a great software.
+
+
 ## References
 
 
 **[1]** I. Perez-Hurtado, D. Orellana-Martin, M.A. Martinez-del-Amor, L. Valencia-Cabrera. (2021). *A membrane computing framework for social navigation in robotics*. To be published.
 
-**[2]** https://github.com/robotics-upo/lightsfm/
+**[2]**  K. Shiarlis, J. Messias, M. van Someren, S. Whiteson, J. Kim, J. Vroon, G. Englebienne, K. Truong, V. Evers, N. Perez-Higueras, I. Perez-Hurtado, et al. *Teresa: A socially intelligent semi-autonomous telepresence system*. In Workshop on MAchine Learning for Social Robotics, IEEE International Conference on Robotics and Automation (ICRA), 2015., Seattle, U.S. 
 
-**[3]**  K. Shiarlis, J. Messias, M. van Someren, S. Whiteson, J. Kim, J. Vroon, G. Englebienne, K. Truong, V. Evers, N. Perez-Higueras, I. Perez-Hurtado, et al. Teresa: A socially intelligent semi-autonomous telepresence system. In Workshop on MAchine Learning for Social Robotics, IEEE International Conference on Robotics and Automation (ICRA), 2015., Seattle, U.S. 
+**[3]** https://github.com/robotics-upo/lightsfm/
 
-
+**[4]** https://github.com/robotics-upo/pedlab
 
 
