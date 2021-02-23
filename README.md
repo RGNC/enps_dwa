@@ -32,6 +32,17 @@ There is an example *launch* file at *enps_dwa/launch/* folder.
 **roslaunch enps_dwa temple.launch**
 
 
+## Analysis
+
+The software includes a folder called *metrics* with the raw generated *metrics.txt* for a simulation of 160 minutes. A script in R is included in such a folder to generate graphics about distances to people and obstacles, as well as velocities.
+
+![distances](metrics/distances.png)
+
+![robot_velocity](metrics/robot_velocity.png)
+
+![people_velocity](metrics/people_velocity.png)
+
+
 ## Acknowledgements
 
 This work was supported by the research project TIN2017-89842-P (MABICAP), co-financed by *Ministerio de Economia, Industria y Competitividad (MINECO)* of Spain, through the *Agencia Estatal de Investigacion (AEI)*, and by *Fondo Europeo de Desarrollo Regional (FEDER)* of the European Union.
