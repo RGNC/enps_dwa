@@ -197,37 +197,6 @@ void initVariables(SystemVariables &v) {
 
 
 inline
-double fitness(double linearVelocity, double angularVelocity, double dt, double k1, double k2, 
-	         double r1, double r2, double theta, double vp1, double vp2)
-{
-	// Theoretical pose of the robot (position1, yaw1) after executiong the circular trajectory described by (linVel,angVel) for dt time
-	utils::Angle yaw1 = utils::Angle::fromRadian(theta);
-	utils::Vector2d position1(r1,r2);
-	double imd = linearVelocity * dt;
-	utils::Vector2d inc(imd * std::cos(yaw1.toRadian() + angularVelocity*dt*0.5), imd * std::sin(yaw1.toRadian() + angularVelocity*dt*0.5));
-	yaw1 += utils::Angle::fromRadian(angularVelocity * dt);	
-	position1 += inc;
-	
-	// Theoretical pose of the robot (position2, yaw2) after following the optimal instant velocity vector (vp1,vp2) for dt time
-	utils::Vector2d position2(r1,r2);
-	utils::Vector2d v(vp1,vp2);
-	position2 += v * dt;
-	utils::Angle yaw2 = v.angle();
-
-
-	utils::Vector2d diffPos = position1 - position2;
-
-	double diffYaw = (yaw1 - yaw2).toRadian();
-	if (diffYaw <0) {
-		diffYaw = -diffYaw;
-	}
-
-	return k1 * diffPos.squaredNorm() + k2 * diffYaw;
-
-}
-
-
-inline
 void run(const InputVariables& i, const UserVariables& u, SystemVariables& s)
 {
 
@@ -386,8 +355,6 @@ void run(const InputVariables& i, const UserVariables& u, SystemVariables& s)
 	// p23
 	s.vp2 = i.v2 + i.delta*(s.K1 * s.F2 + s.K2 * s.sum_f2 + s.K3 / (N==0?1.0 : (double)N) * s.sum_fp2 );
 
-	
-
 	// p25 
 	s.f.resize(M);
 	for (unsigned k=0;k<M;k++) {
@@ -410,8 +377,35 @@ void run(const InputVariables& i, const UserVariables& u, SystemVariables& s)
 }
 
 
+inline
+double fitness(double linearVelocity, double angularVelocity, double dt, double k1, double k2, 
+	         double r1, double r2, double theta, double vp1, double vp2)
+{
+	// Theoretical pose of the robot (position1, yaw1) after executiong the circular trajectory described by (linVel,angVel) for dt time
+	utils::Angle yaw1 = utils::Angle::fromRadian(theta);
+	utils::Vector2d position1(r1,r2);
+	double imd = linearVelocity * dt;
+	utils::Vector2d inc(imd * std::cos(yaw1.toRadian() + angularVelocity*dt*0.5), imd * std::sin(yaw1.toRadian() + angularVelocity*dt*0.5));
+	yaw1 += utils::Angle::fromRadian(angularVelocity * dt);	
+	position1 += inc;
+	
+	// Theoretical pose of the robot (position2, yaw2) after following the optimal instant velocity vector (vp1,vp2) for dt time
+	utils::Vector2d position2(r1,r2);
+	utils::Vector2d v(vp1,vp2);
+	position2 += v * dt;
+	utils::Angle yaw2 = v.angle();
 
 
+	utils::Vector2d diffPos = position1 - position2;
+
+	double diffYaw = (yaw1 - yaw2).toRadian();
+	if (diffYaw <0) {
+		diffYaw = -diffYaw;
+	}
+
+	return k1 * diffPos.squaredNorm() + k2 * diffYaw;
+
+}
 
 }
 
