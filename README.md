@@ -10,10 +10,10 @@ A mobile robot acting in a human environment should follow social conventions su
 
 The software simulates a number of human agents in an in-door environment walking under a social random walk, i.e., each agent selects a random near goal and walk to approach it by following the Social Force Model, when the goal is reached, another goal is randomly selected. There is a robot agent navigating by using the ENPS model described in [1], the robot goals are selected in the same way as the human goals. The ENPS model computes for each time-instant the optimal velocity vector of the robot by following the SFM and then a variant of the Dynamic Window Approach is applied to select an appropiated motion command. The simulation is executed until the user kills the process. A file *metrics.txt* is generated with information for each agent about velocities and distances to nearest obstacle and nearest agent. The purpose of this software is to validate the ENPS model and provide a proof of concepts. An efficient parallel implementation is proposed as future work.
 
-The software shows in the RVIZ GUI a visualization in real-time of the simulation, showing the force vectors for each agent, the simulated Lidar scan, the simulated people detections, the set of possible robot motion commands (circular trajectories) and the selected motion command.
+The software shows in the RVIZ GUI a visualization in real-time of the simulation (see video below), showing the force vectors for each agent, the simulated Lidar scan, the simulated people detections, the set of possible robot motion commands (circular trajectories) and the selected motion command.
 
 
-![Screenshot](images/screenshot.png)
+[![Simulator](images/screenshot.png)](https://youtu.be/qyci-ZW7LEE "Simulator")
 
 
 ## Compilation instructions
