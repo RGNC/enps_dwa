@@ -34,7 +34,7 @@ There is an example *launch* file at *enps_dwa/launch/* folder.
 
 ## Analysis
 
-The software includes a folder called *metrics* with the raw *metrics.txt* file for a simulation of 160 minutes. A script in R is included in such a folder to generate graphics the graphics below about distances and velocities. The robot velocity is limited to 0.6 m/s as in [2], the people velocity has a maximum of 1.2 m/s. As can be seen in the first graphics. The behaviour of the robot is similar to the people with respect to distances to people and obstacles despite the non-holonomic constraints. 
+The software includes a folder called *metrics* with the raw *metrics.txt* file for a simulation of 160 minutes. A script in R is included in such a folder to generate  the graphics below about distances and velocities. The robot velocity is limited to 0.6 m/s as in [2], the people velocity has a maximum of 1.2 m/s. As can be seen, the behaviour of the robot is similar to the people with respect to distances despite the non-holonomic and velocity constraints. 
 
 ![distances](metrics/distances.png)
 
