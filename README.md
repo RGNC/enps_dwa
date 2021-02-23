@@ -13,7 +13,7 @@ The software simulates a number of human agents in an in-door environment walkin
 The software shows in the RVIZ GUI a visualization in real-time of the simulation (see video below), showing the force vectors for each agent, the simulated Lidar scan, the simulated people detections, the set of possible robot motion commands (circular trajectories) and the selected motion command.
 
 
-[![Simulator](images/screenshot.png)](https://youtu.be/qyci-ZW7LEE "Simulator")
+[![Simulator video](images/screenshot.png)](https://youtu.be/qyci-ZW7LEE "Simulator video")
 
 
 ## Compilation instructions
