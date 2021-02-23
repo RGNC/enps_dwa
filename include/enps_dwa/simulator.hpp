@@ -1,3 +1,20 @@
+/*
+    This file is part of ENPS_DWA.
+    
+    https://github.com/RGNC/enps_dwa
+    ENPS_DWA is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    RENPSM is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with RENPSM.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
 #ifndef _SIMULATOR_
 #define _SIMULATOR_
 
@@ -135,6 +152,8 @@ struct SystemVariables
 	// Variables to store the selected motion command
 	double selectedLinVel;
 	double selectedAngVel;
+
+	unsigned selectedIndex;
 
 };
 
@@ -378,12 +397,14 @@ void run(const InputVariables& i, const UserVariables& u, SystemVariables& s)
 	// p26 p27
 	s.selectedLinVel = u.linVels[0];
 	s.selectedAngVel = u.angVels[0];
+	s.selectedIndex = 0;
 	double minFitness = s.f[0];
 	for (unsigned k=1;k< M; k++) {
 		if (s.f[k]<minFitness) {
 			minFitness = s.f[k];
 			s.selectedLinVel = u.linVels[k];
 			s.selectedAngVel = u.angVels[k];
+			s.selectedIndex = k;
 		}
 	}
 }

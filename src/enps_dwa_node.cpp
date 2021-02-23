@@ -1,7 +1,25 @@
+/*
+    This file is part of ENPS_DWA.
+    
+    https://github.com/RGNC/enps_dwa
+    ENPS_DWA is free software: you can redistribute it and/or modify
+    it under the terms of the GNU General Public License as published by
+    the Free Software Foundation, either version 3 of the License, or
+    (at your option) any later version.
+    RENPSM is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+    GNU General Public License for more details.
+    You should have received a copy of the GNU General Public License
+    along with RENPSM.  If not, see <http://www.gnu.org/licenses/>.
+*/
+
+
 #include <ros/ros.h>
 #include <vector>
 #include <random>
 #include <chrono>
+#include <fstream>
 #include <tf/transform_listener.h>
 #include <tf/transform_broadcaster.h>
 #include <nav_msgs/Odometry.h>
@@ -16,6 +34,14 @@ namespace enps
 {
 
 const double PERSON_MESH_SCALE = (2.0 / 8.5 * 1.8)*0.9;
+
+struct Metrics
+{
+	double distanceToNearestPerson;
+	double distanceToNearestObstacle;
+	double velocity;
+};
+
 class Node
 {
 public:
@@ -23,7 +49,8 @@ public:
 	~Node() {}
 
 private:
-
+	Metrics computeMetrics(unsigned index);
+	void publishTrajectories(const ros::Time& current_time);
     bool publishOdom(const ros::Time& current_time);
     void publishScan360(const ros::Time& current_time);
     bool publishPeople(const ros::Time& current_time);
@@ -51,11 +78,13 @@ private:
 	ros::Publisher scan360_pub;
 	ros::Publisher forces_pub;
 	ros::Publisher detection_markers_pub;
+	ros::Publisher trajectories_pub;
 	std::mt19937 gen;
 	double scan_range_max;
 	double pose_initial_x,pose_initial_y,pose_initial_yaw,robot_radius,robot_max_velocity;	
 	double person_radius, people_average_vel,people_sd_vel,people_detection_range;
 	ros::Publisher people_markers_pub;
+	visualization_msgs::MarkerArray markers;
 	
 	// simulator
 	simulator::InputVariables input;
@@ -73,6 +102,25 @@ std_msgs::ColorRGBA Node::getColor(double r, double g, double b, double a)
 	color.b = b;
 	color.a = a;
 	return color;
+}
+Metrics Node::computeMetrics(unsigned index)
+{
+	utils::Vector2d pos = agents[index].position;
+	Metrics metrics;
+	metrics.distanceToNearestPerson = 9999999;
+	metrics.distanceToNearestObstacle = sfm::MAP.getNearestObstacle(pos).distance;
+	metrics.velocity = agents[index].velocity.norm();
+	for (unsigned i=0; i < agents.size(); i++) {
+		if (i == index) {
+			continue;
+		}
+		double d = (pos - agents[i].position).norm();
+		if (d < metrics.distanceToNearestPerson) {
+			metrics.distanceToNearestPerson = d;
+		}
+	}
+	return metrics;
+
 }
 
 
@@ -198,9 +246,6 @@ int Node::getPersonCollisionIndex(const utils::Vector2d& x, double collisionThre
 }
 
 
-
-
-
 void Node::publishScan360(const ros::Time& current_time)
 {
 	input.o1.clear();
@@ -316,6 +361,25 @@ utils::Vector2d Node::extendForce(utils::Vector2d f, double r) {
 }
 
 
+void Node::publishTrajectories(const ros::Time& current_time) {
+	for (unsigned i=0;i<markers.markers.size();i++) {
+		markers.markers[i].header.stamp = current_time;
+		markers.markers[i].lifetime = ros::Duration(1.0);
+		if (i==system.selectedIndex) {
+			markers.markers[i].scale.x = 0.2;
+			markers.markers[i].color.r = 1.0;
+			markers.markers[i].color.g = 0;
+			markers.markers[i].color.b = 0;
+		} else {
+			markers.markers[i].scale.x = 0.01;
+			markers.markers[i].color.r = 0.5;
+			markers.markers[i].color.g = 0.5;
+			markers.markers[i].color.b = 0.5;
+		}
+	}
+	trajectories_pub.publish(markers);
+}
+
 void Node::publishForces(const ros::Time& current_time) {
 	visualization_msgs::MarkerArray markers;
 	for(unsigned i=0;i<agents.size();i++) {
@@ -421,34 +485,53 @@ bool Node::transformPoint(double& x, double& y, const std::string& sourceFrameId
 
 
 
-
 Node::Node(ros::NodeHandle& n, ros::NodeHandle& pn) 
  : gen(std::chrono::system_clock::now().time_since_epoch().count()),
    tf_listener(ros::Duration(10)) {
 
 	double freq,dt;
 	std::string odom_id,scan360_id;
-	ros::Time current_time,prev_time;
+	ros::Time current_time,prev_time,metrics_time,init_time;
 	int max_people;
 	int scan360_readings;
 
 	ROS_INFO("Initiating...");
 
 	simulator::initVariables(system);
-	
+	std::ofstream metricsFile("metrics.txt");
+	metricsFile<<"Time Agent Velocity distanceToNearestPerson distanceToNearestObstacle"<<std::endl;
 
+	unsigned counter = 0;
 
 	for (double i=-0.8;i<=0.8;i+=0.05) {
 		for (double j=0; j<=0.6;j+=0.05) {
 			user.angVels.push_back(i);
 			user.linVels.push_back(j);
+			visualization_msgs::Marker marker;
+			marker.points.resize(30);
+			sfm::Agent dummy(j,i);
+			for (unsigned k = 0; k< 30; k++) {
+				marker.points[k].x = dummy.position.getX();
+				marker.points[k].y = dummy.position.getY();
+				marker.points[k].z = 0;
+				dummy.move(0.1);
+			}
+			marker.header.frame_id="base_link";
+			marker.id = counter++;
+			marker.type = 4;
+			marker.action = 0;
+			marker.scale.x = 0.01;
+			marker.color.a = 1.0;
+			marker.color.r = 0.5;
+			marker.color.g = 0.5;
+			marker.color.b = 0.5;
+			marker.pose.orientation = tf::createQuaternionMsgFromRollPitchYaw(0,0,0);	
+			markers.markers.push_back(marker);
+			
 			
 		}
 	}
 	
-
-
-
 	user.k1 = 1.0;
 	user.k2 = 0.1;
 
@@ -469,6 +552,7 @@ Node::Node(ros::NodeHandle& n, ros::NodeHandle& pn)
 	pn.param<double>("people_detection_range",people_detection_range,2.5);	
  	odom_pub = pn.advertise<nav_msgs::Odometry>(odom_id, 1);
  	detection_markers_pub = pn.advertise<visualization_msgs::MarkerArray>("/detections", 1);
+ 	trajectories_pub = pn.advertise<visualization_msgs::MarkerArray>("/trajectories", 1);
  	scan360_pub = pn.advertise<sensor_msgs::LaserScan>(scan360_id, 1);
  	people_markers_pub =  pn.advertise<visualization_msgs::MarkerArray>("/people", 1);	
  	forces_pub =  pn.advertise<visualization_msgs::MarkerArray>("/forces", 1);	
@@ -492,7 +576,8 @@ Node::Node(ros::NodeHandle& n, ros::NodeHandle& pn)
 	scan360.range_max = scan_range_max;
 	scan360.ranges.resize(scan360_readings);	
 	prev_time = ros::Time::now();
-	
+	metrics_time = ros::Time::now();
+	init_time = ros::Time::now();
 	ROS_INFO("Ok");
 	while (n.ok()) {
 		current_time = ros::Time::now();
@@ -502,13 +587,23 @@ Node::Node(ros::NodeHandle& n, ros::NodeHandle& pn)
 		sfm::SFM.updatePosition(agents,dt);
 		input.delta = dt;
 		prev_time=current_time;
+		if ((current_time-metrics_time).toSec()>=1.0) {
+			double t = (current_time-init_time).toSec();
+			for (unsigned i=0;i<agents.size();i++) {
+				Metrics m = computeMetrics(i);
+				metricsFile << t <<" "<< i << " "<< m.velocity <<" " << m.distanceToNearestPerson << " " << m.distanceToNearestObstacle << std::endl;
+			}
+			metrics_time = current_time;
+		}
 		publishOdom(current_time);
 		publishScan360(current_time);
 		publishPeople(current_time);
 		publishDetections(current_time);
+		publishTrajectories(current_time);
 		setGoals();
 		sfm::SFM.computeForces(agents,&sfm::MAP);
 		simulator::run(input,user,system);
+
 		agents[0].linearVelocity = system.selectedLinVel;
 		agents[0].angularVelocity = system.selectedAngVel;
 
@@ -517,7 +612,7 @@ Node::Node(ros::NodeHandle& n, ros::NodeHandle& pn)
 		r.sleep();
 		ros::spinOnce();	
 	}
-
+	metricsFile.close();
 
 }
 
