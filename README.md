@@ -13,6 +13,9 @@ The software simulates a number of human agents in an in-door environment walkin
 The software shows in the RVIZ GUI a visualization in real-time of the simulation, showing the force vectors for each agent, the simulated Lidar scan, the simulated people detections, the set of possible robot motion commands (circular trajectories) and the selected motion command.
 
 
+![Screenshot](images/screenshot.png)
+
+
 ## Compilation instructions
 
 The software has been developed for ROS Noetic under Ubuntu 20.04.
@@ -27,9 +30,6 @@ The software has been developed for ROS Noetic under Ubuntu 20.04.
 There is an example *launch* file at *enps_dwa/launch/* folder.
 
 **roslaunch enps_dwa temple.launch**
-
-
-![Screenshot](images/screenshot.png)
 
 
 ## Acknowledgements
